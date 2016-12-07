@@ -21,10 +21,8 @@ const ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 const StyleSheetPropType = require('StyleSheetPropType');
 const ViewStylePropTypes = require('ViewStylePropTypes');
 
-const isTVOS = (Platform.OS === 'ios' && Platform.SystemName === 'tvOS');
-
 var TVViewPropTypes = {};
-if(isTVOS) {
+if(Platform.isTVOS) {
   TVViewPropTypes = require('../AppleTV/TVViewPropTypes');
 }
 

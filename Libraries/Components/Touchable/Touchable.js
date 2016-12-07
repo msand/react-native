@@ -20,8 +20,6 @@ const TouchEventUtils = require('fbjs/lib/TouchEventUtils');
 const UIManager = require('UIManager');
 const View = require('View');
 
-const isTVOS = (Platform && Platform.OS === 'ios' && Platform.SystemName === 'tvOS');
-
 const TVEventHandler = require('TVEventHandler');
 
 const keyMirror = require('fbjs/lib/keyMirror');
@@ -321,7 +319,7 @@ var LONG_PRESS_ALLOWED_MOVEMENT = 10;
 var TouchableMixin = {
 
   componentDidMount: function() {
-    if (isTVOS) {
+    if (Platform.isTVOS) {
       this._tvEventHandler = new TVEventHandler();
       this._tvEventHandler.enable(this, function(cmp, evt) {
         var myTag = ReactNative.findNodeHandle(cmp);
