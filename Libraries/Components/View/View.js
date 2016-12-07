@@ -22,8 +22,8 @@ const StyleSheetPropType = require('StyleSheetPropType');
 const ViewStylePropTypes = require('ViewStylePropTypes');
 
 var TVViewPropTypes = {};
-if(Platform.isTVOS) {
-  TVViewPropTypes = require('../AppleTV/TVViewPropTypes');
+if (Platform.isTVOS) {
+  TVViewPropTypes = require('TVViewPropTypes');
 }
 
 const requireNativeComponent = require('requireNativeComponent');
