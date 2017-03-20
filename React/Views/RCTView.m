@@ -377,8 +377,16 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 {
   // Find a suitable view to use for clipping
   UIView *clipView = [self react_findClipView];
+  // Give ourselves a screen's worth of space beyond the bounds of the clipView
+  CGRect screenBounds = [UIScreen mainScreen].bounds;
+  CGFloat extraDistance = MAX(screenBounds.size.width, screenBounds.size.height);
+  
+  CGRect boundsToUse = CGRectMake(CGRectGetMinX(clipView.bounds) - extraDistance,
+                                  CGRectGetMinY(clipView.bounds) - extraDistance,
+                                  CGRectGetWidth(clipView.bounds) + 2*extraDistance,
+                                  CGRectGetHeight(clipView.bounds) + 2*extraDistance);
   if (clipView) {
-    [self react_updateClippedSubviewsWithClipRect:clipView.bounds relativeToView:clipView];
+    [self react_updateClippedSubviewsWithClipRect:boundsToUse relativeToView:clipView];
   }
 }
 

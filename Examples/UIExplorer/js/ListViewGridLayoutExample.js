@@ -28,6 +28,7 @@ var ReactNative = require('react-native');
 var {
   Image,
   ListView,
+  Platform,
   TouchableHighlight,
   StyleSheet,
   Text,
@@ -127,6 +128,8 @@ var hashCode = function(str) {
   return hash;
 };
 
+var scale = Platform.isTVOS ? 3 : 1;
+
 var styles = StyleSheet.create({
   list: {
     justifyContent: 'space-around',
@@ -136,23 +139,23 @@ var styles = StyleSheet.create({
   },
   row: {
     justifyContent: 'center',
-    padding: 5,
-    margin: 3,
-    width: 100,
-    height: 100,
+    padding: scale*5,
+    margin: scale*3,
+    width: scale*100,
+    height: scale*100,
     backgroundColor: '#F6F6F6',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 5,
+    borderWidth: scale*1,
+    borderRadius: scale*5,
     borderColor: '#CCC'
   },
   thumb: {
-    width: 64,
-    height: 64
+    width: scale*64,
+    height: scale*64
   },
   text: {
     flex: 1,
-    marginTop: 5,
+    marginTop: scale*5,
     fontWeight: 'bold'
   },
 });
