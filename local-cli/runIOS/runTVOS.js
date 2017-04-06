@@ -15,7 +15,7 @@ const findXcodeProject = require('./findXcodeProject');
 const parseIOSDevicesList = require('./parseIOSDevicesList');
 const findMatchingSimulator = require('./findMatchingSimulator');
 const getBuildPath = function(configuration = 'Debug', appName, isDevice) {
-  return `build/Build/Products/${configuration}-${isDevice ? 'iphoneos' : 'iphonesimulator'}/${appName}.app`;
+  return `build/Build/Products/${configuration}-${isDevice ? 'appletvos' : 'appletvsimulator'}/${appName}.app`;
 };
 
 function runIOS(argv, config, args) {
@@ -25,7 +25,7 @@ function runIOS(argv, config, args) {
     throw new Error('Could not find Xcode project files in ios folder');
   }
 
-  const inferredSchemeName = path.basename(xcodeProject.name, path.extname(xcodeProject.name));
+  const inferredSchemeName = path.basename(xcodeProject.name, path.extname(xcodeProject.name)) + '-tvOS';
   const scheme = args.scheme || inferredSchemeName;
   console.log(`Found Xcode ${xcodeProject.isWorkspace ? 'workspace' : 'project'} ${xcodeProject.name}`);
   const devices = parseIOSDevicesList(
@@ -76,7 +76,7 @@ function runOnSimulator(xcodeProject, args, inferredSchemeName, scheme){
       throw new Error('Could not parse the simulator list output');
     }
 
-    const selectedSimulator = findMatchingSimulator(simulators, args.simulator, 'iOS');
+    const selectedSimulator = findMatchingSimulator(simulators, args.simulator, 'tvOS');
     if (!selectedSimulator) {
       throw new Error(`Could not find ${args.simulator} simulator`);
     }
@@ -157,7 +157,7 @@ function buildProject(xcodeProject, udid, scheme, configuration = 'Debug', launc
     });
     buildProcess.on('close', function(code) {
       //FULL_PRODUCT_NAME is the actual file name of the app, which actually comes from the Product Name in the build config, which does not necessary match a scheme name,  example output line: export FULL_PRODUCT_NAME="Super App Dev.app"
-      let productNameMatch = /export FULL_PRODUCT_NAME="?(.+).app"?$/.exec(buildOutput);
+      let productNameMatch = /export FULL_PRODUCT_NAME="?(.+).app/.exec(buildOutput);
       if (productNameMatch && productNameMatch.length && productNameMatch.length > 1) {
         return resolve(productNameMatch[1]);//0 is the full match, 1 is the app name
       }
@@ -208,7 +208,7 @@ function getProcessOptions(launchPackager) {
 }
 
 module.exports = {
-  name: 'run-ios',
+  name: 'run-tvos',
   description: 'builds your app and starts it on iOS simulator',
   func: runIOS,
   examples: [
@@ -222,13 +222,13 @@ module.exports = {
   },
   {
     desc: "Run on a connected device, e.g. Max's iPhone",
-    cmd: 'react-native run-ios --device "Max\'s iPhone"',
+    cmd: "react-native run-ios --device 'Max's iPhone'",
   },
   ],
   options: [{
     command: '--simulator [string]',
     description: 'Explicitly set simulator to use',
-    default: 'iPhone 6',
+    default: 'Apple TV 1080p',
   } , {
     command: '--configuration [string]',
     description: 'Explicitly set the scheme configuration to use',
