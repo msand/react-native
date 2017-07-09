@@ -60,7 +60,10 @@
     // Right
     [self addTapGestureRecognizerWithSelector:@selector(swipedRight:)
                                     pressType:UIPressTypeRightArrow];
-
+    
+    // Long press
+    [self addLongPressRecognizerWithSelector:@selector(longPress:) pressType:UIPressTypeSelect];
+    
 
     // Recognizers for Apple TV remote trackpad swipes
 
@@ -79,7 +82,7 @@
     // Right
     [self addSwipeGestureRecognizerWithSelector:@selector(swipedRight:)
                                       direction:UISwipeGestureRecognizerDirectionRight];
-
+    
   }
 
   return self;
@@ -102,7 +105,9 @@
 
 - (void)longPress:(UIGestureRecognizer *)r
 {
-  [self sendAppleTVEvent:@"longPress" toView:r.view];
+  //[self sendAppleTVEvent:@"longPress" toView:r.view];
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTShowDevMenuNotification" object:nil];
+
 }
 
 - (void)swipedUp:(UIGestureRecognizer *)r
@@ -140,6 +145,13 @@
   UISwipeGestureRecognizer *recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:selector];
   recognizer.direction = direction;
 
+  [_tvRemoteGestureRecognizers addObject:recognizer];
+}
+
+- (void)addLongPressRecognizerWithSelector:(nonnull SEL)selector pressType:(UIPressType)pressType {
+  UILongPressGestureRecognizer *recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:selector];
+  recognizer.allowedPressTypes = @[@(pressType)];
+  
   [_tvRemoteGestureRecognizers addObject:recognizer];
 }
 
