@@ -24,6 +24,47 @@
 
 #import "RCTDevMenu.h"
 
+#pragma mark Pan gesture recognizer
+
+@interface RCTTVPanGestureRecognizer : UIPanGestureRecognizer
+
+@property(nonatomic, assign) CGPoint firstTouchLocation;
+
+@end
+
+@implementation RCTTVPanGestureRecognizer
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  UITouch *t = [touches anyObject];
+  self.firstTouchLocation = [t locationInView:self.view];
+  [self sendAppleTVEvent:@"touchesBegan" withTouch:t];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  UITouch *t = [touches anyObject];
+  [self sendAppleTVEvent:@"touchesMoved" withTouch:t];
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  UITouch *t = [touches anyObject];
+  [self sendAppleTVEvent:@"touchesEnded" withTouch:t];
+}
+
+- (void)sendAppleTVEvent:(NSString *)eventType withTouch:(UITouch *)t
+{
+  CGPoint location = [t locationInView:self.view];
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
+                                                      object:@{@"eventType":eventType,
+                                                               @"x":@(location.x - self.firstTouchLocation.x),
+                                                               @"y":@(location.y - self.firstTouchLocation.y)}];
+}
+
+@end
+
 @implementation RCTTVRemoteHandler {
   NSMutableArray<UIGestureRecognizer *> *_tvRemoteGestureRecognizers;
 }
@@ -90,6 +131,8 @@
     [self addSwipeGestureRecognizerWithSelector:@selector(swipedRight:)
                                       direction:UISwipeGestureRecognizerDirectionRight];
 
+    // Pan
+    [self addPanGestureRecognizerWithSelector:@selector(panned:)];
   }
 
   return self;
@@ -113,7 +156,6 @@
 - (void)longPlayPausePressed:(UIGestureRecognizer *)r
 {
   [self sendAppleTVEvent:@"longPlayPause" toView:r.view];
-
   // If shake to show is enabled on device, use long play/pause event to show dev menu
 #if RCT_DEV
   [[NSNotificationCenter defaultCenter] postNotificationName:RCTShowDevMenuNotification object:nil];
@@ -145,6 +187,11 @@
   [self sendAppleTVEvent:@"right" toView:r.view];
 }
 
+- (void)panned:(UIPanGestureRecognizer *)r
+{
+  [self sendAppleTVEvent:@"pan" toView:r.view];
+}
+
 #pragma mark -
 
 - (void)addLongPressGestureRecognizerWithSelector:(nonnull SEL)selector pressType:(UIPressType)pressType
@@ -168,6 +215,13 @@
   UISwipeGestureRecognizer *recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:selector];
   recognizer.direction = direction;
 
+  [_tvRemoteGestureRecognizers addObject:recognizer];
+}
+
+- (void)addPanGestureRecognizerWithSelector:(nonnull SEL)selector
+{
+  RCTTVPanGestureRecognizer *recognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:selector];
+  
   [_tvRemoteGestureRecognizers addObject:recognizer];
 }
 
