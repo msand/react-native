@@ -92,6 +92,8 @@
     [self addSwipeGestureRecognizerWithSelector:@selector(swipedRight:)
                                       direction:UISwipeGestureRecognizerDirectionRight];
 
+    // Pan
+    [self addPanGestureRecognizerWithSelector:@selector(panned:)];
   }
 
   return self;
@@ -146,6 +148,11 @@
   [self sendAppleTVEvent:@"right" toView:r.view];
 }
 
+- (void)panned:(UIPanGestureRecognizer *)r
+{
+  [self sendAppleTVEvent:@"pan" toView:r.view];
+}
+
 #pragma mark -
 
 - (void)addLongPressGestureRecognizerWithSelector:(nonnull SEL)selector pressType:(UIPressType)pressType
@@ -169,6 +176,13 @@
   UISwipeGestureRecognizer *recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:selector];
   recognizer.direction = direction;
 
+  [_tvRemoteGestureRecognizers addObject:recognizer];
+}
+
+- (void)addPanGestureRecognizerWithSelector:(nonnull SEL)selector
+{
+  RCTTVPanGestureRecognizer *recognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:selector];
+  
   [_tvRemoteGestureRecognizers addObject:recognizer];
 }
 
