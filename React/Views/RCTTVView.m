@@ -88,22 +88,17 @@
 
 RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 
-- (void)setIsTVSelectable:(BOOL)isTVSelectable {
+- (void)setIsTVSelectable:(BOOL)isTVSelectable
+{
   self->_isTVSelectable = isTVSelectable;
   if(isTVSelectable) {
     UITapGestureRecognizer *selectRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSelect:)];
     selectRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
     _selectRecognizer = selectRecognizer;
     [self addGestureRecognizer:_selectRecognizer];
-    RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-    _panRecognizer = panRecognizer;
-    [self addGestureRecognizer:_panRecognizer];
   } else {
     if(_selectRecognizer) {
       [self removeGestureRecognizer:_selectRecognizer];
-    }
-    if(_panRecognizer) {
-      [self removeGestureRecognizer:_panRecognizer];
     }
   }
 }
@@ -201,6 +196,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 {
   if (context.nextFocusedView == self && self.isTVSelectable ) {
     [self becomeFirstResponder];
+    if(self.sendsTVTouchEvents) {
+      RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+      _panRecognizer = panRecognizer;
+      [self addGestureRecognizer:_panRecognizer];
+    }
     [coordinator addCoordinatedAnimations:^(void){
       if([self.tvParallaxProperties[@"enabled"] boolValue]) {
         [self addParallaxMotionEffects];
@@ -220,6 +220,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
         [self removeMotionEffect:effect];
       }
     } completion:^(void){}];
+    if (_panRecognizer) {
+      [self removeGestureRecognizer:_panRecognizer];
+    }
     [self resignFirstResponder];
   }
 }

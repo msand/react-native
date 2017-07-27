@@ -25,6 +25,14 @@ var TVViewPropTypes = {
     isTVSelectable: PropTypes.bool,
 
     /**
+     * *(Apple TV only)* When set to true, this view will have a gesture recognizer
+     * that sends touch events to TVEventHandler.
+     *
+     * @platform ios
+     */
+    sendsTVTouchEvents: PropTypes.bool,
+
+    /**
      * *(Apple TV only)* May be set to true to force the Apple TV focus engine to move focus to this view.
      *
      * @platform ios
@@ -76,6 +84,7 @@ var TVViewPropTypes = {
 
 export type TVViewProps = {
   isTVSelectable?: bool,
+  sendsTVTouchEvents: PropTypes.bool,
   hasTVPreferredFocus?: bool,
   tvParallaxProperties?: Object,
   tvParallaxShiftDistanceX?: number,

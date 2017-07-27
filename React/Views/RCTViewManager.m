@@ -110,6 +110,7 @@ RCT_EXPORT_MODULE()
 #if TARGET_OS_TV
 // Apple TV properties
 RCT_EXPORT_VIEW_PROPERTY(isTVSelectable, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(sendsTVTouchEvents, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(hasTVPreferredFocus, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(tvParallaxProperties, NSDictionary)
 #endif

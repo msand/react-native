@@ -19,6 +19,7 @@
  * TV event handlers
  */
 @property (nonatomic, assign) BOOL isTVSelectable; // True if this view is TV-focusable
+@property (nonatomic, assign) BOOL sendsTVTouchEvents; // True if this view sends TV remote touch events
 
 /**
  *  Properties for Apple TV focus parallax effects
