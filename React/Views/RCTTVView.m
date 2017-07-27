@@ -21,9 +21,54 @@
 #import "RCTView.h"
 #import "UIView+React.h"
 
+@interface RCTTVPanGestureRecognizer : UIPanGestureRecognizer
+
+@property(nonatomic, assign) CGPoint firstTouchLocation;
+
+@end
+
+@implementation RCTTVPanGestureRecognizer
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  UITouch *t = [touches anyObject];
+  self.firstTouchLocation = [t locationInView:self.view];
+  [self sendAppleTVEvent:@"touchesBegan" withTouch:t];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  UITouch *t = [touches anyObject];
+  [self sendAppleTVEvent:@"touchesMoved" withTouch:t];
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  UITouch *t = [touches anyObject];
+  [self sendAppleTVEvent:@"touchesEnded" withTouch:t];
+}
+
+- (void)sendAppleTVEvent:(NSString *)eventType withTouch:(UITouch *)t
+{
+  CGPoint location = [t locationInView:self.view];
+  NSString *reactTag = @"";
+  if([self.view respondsToSelector:@selector(reactTag)]) {
+    reactTag = [self.view performSelector:@selector(reactTag)];
+  }
+  [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
+                                                      object:@{@"eventType":eventType,
+                                                               @"x":@(location.x - self.firstTouchLocation.x),
+                                                               @"y":@(location.y - self.firstTouchLocation.y),
+                                                               @"tag":reactTag}];
+}
+
+@end
+
+
 @implementation RCTTVView
 {
   UITapGestureRecognizer *_selectRecognizer;
+  RCTTVPanGestureRecognizer *_panRecognizer;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -46,13 +91,19 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 - (void)setIsTVSelectable:(BOOL)isTVSelectable {
   self->_isTVSelectable = isTVSelectable;
   if(isTVSelectable) {
-    UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSelect:)];
-    recognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
-    _selectRecognizer = recognizer;
+    UITapGestureRecognizer *selectRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSelect:)];
+    selectRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
+    _selectRecognizer = selectRecognizer;
     [self addGestureRecognizer:_selectRecognizer];
+    RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    _panRecognizer = panRecognizer;
+    [self addGestureRecognizer:_panRecognizer];
   } else {
     if(_selectRecognizer) {
       [self removeGestureRecognizer:_selectRecognizer];
+    }
+    if(_panRecognizer) {
+      [self removeGestureRecognizer:_panRecognizer];
     }
   }
 }
@@ -61,6 +112,12 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 {
   [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
                                                       object:@{@"eventType":@"select",@"tag":self.reactTag}];
+}
+
+- (void)handlePan:(__unused UIGestureRecognizer *)r
+{
+  [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
+                                                      object:@{@"eventType":@"pan",@"tag":self.reactTag}];
 }
 
 - (BOOL)isUserInteractionEnabled
