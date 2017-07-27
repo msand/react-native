@@ -185,11 +185,6 @@
   [self sendAppleTVEvent:@"right" toView:r.view];
 }
 
-- (void)panned:(UIPanGestureRecognizer *)r
-{
-  [self sendAppleTVEvent:@"pan" toView:r.view];
-}
-
 #pragma mark -
 
 - (void)addLongPressGestureRecognizerWithSelector:(nonnull SEL)selector pressType:(UIPressType)pressType
