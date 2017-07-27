@@ -92,8 +92,6 @@
     [self addSwipeGestureRecognizerWithSelector:@selector(swipedRight:)
                                       direction:UISwipeGestureRecognizerDirectionRight];
 
-    // Pan
-    [self addPanGestureRecognizerWithSelector:@selector(panned:)];
   }
 
   return self;
@@ -176,13 +174,6 @@
   UISwipeGestureRecognizer *recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:selector];
   recognizer.direction = direction;
 
-  [_tvRemoteGestureRecognizers addObject:recognizer];
-}
-
-- (void)addPanGestureRecognizerWithSelector:(nonnull SEL)selector
-{
-  RCTTVPanGestureRecognizer *recognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:selector];
-  
   [_tvRemoteGestureRecognizers addObject:recognizer];
 }
 
