@@ -99,9 +99,15 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
     selectRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
     _selectRecognizer = selectRecognizer;
     [self addGestureRecognizer:_selectRecognizer];
+    RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    _panRecognizer = panRecognizer;
+    [self addGestureRecognizer:_panRecognizer];
   } else {
     if(_selectRecognizer) {
       [self removeGestureRecognizer:_selectRecognizer];
+    }
+    if(_panRecognizer) {
+      [self removeGestureRecognizer:_panRecognizer];
     }
   }
 }
