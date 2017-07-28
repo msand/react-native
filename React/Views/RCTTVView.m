@@ -21,6 +21,8 @@
 #import "RCTView.h"
 #import "UIView+React.h"
 
+#import "RCTTouchHandler.h"
+
 @interface RCTTVPanGestureRecognizer : UIPanGestureRecognizer
 
 @property(nonatomic, assign) CGPoint firstTouchLocation;
@@ -68,7 +70,8 @@
 @implementation RCTTVView
 {
   UITapGestureRecognizer *_selectRecognizer;
-  RCTTVPanGestureRecognizer *_panRecognizer;
+  UIPanGestureRecognizer *_panRecognizer;
+  RCTTouchHandler *_touchHandler;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -192,12 +195,23 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
   }];
 }
 
+- (RCTBridge *)bridge
+{
+  UIView *v = self;
+  while (v != nil && ![v isKindOfClass:[RCTRootView class]]) {
+    v = [v superview];
+  }
+  return [(RCTRootView *)v bridge];
+}
+
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
   if (context.nextFocusedView == self && self.isTVSelectable ) {
     [self becomeFirstResponder];
     if(self.sendsTVTouchEvents) {
-      RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+      //RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+      RCTBridge *b = [self bridge];
+      RCTTouchHandler *panRecognizer = [[RCTTouchHandler alloc] initWithBridge:b];
       _panRecognizer = panRecognizer;
       [self addGestureRecognizer:_panRecognizer];
     }

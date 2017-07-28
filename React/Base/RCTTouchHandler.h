@@ -13,7 +13,7 @@
 
 @class RCTBridge;
 
-@interface RCTTouchHandler : UIGestureRecognizer
+@interface RCTTouchHandler : UIPanGestureRecognizer
 
 - (instancetype)initWithBridge:(RCTBridge *)bridge NS_DESIGNATED_INITIALIZER;
 
