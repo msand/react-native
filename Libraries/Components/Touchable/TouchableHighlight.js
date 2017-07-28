@@ -264,6 +264,7 @@ var TouchableHighlight = createReactClass({
         onLayout={this.props.onLayout}
         hitSlop={this.props.hitSlop}
         isTVSelectable={true}
+        sendsTVTouchEvents={this.props.sendsTVTouchEvents}
         tvParallaxProperties={this.props.tvParallaxProperties}
         hasTVPreferredFocus={this.state.hasTVPreferredFocus}
         onStartShouldSetResponder={this.touchableHandleStartShouldSetResponder}

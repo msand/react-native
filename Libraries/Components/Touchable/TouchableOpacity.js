@@ -180,6 +180,7 @@ var TouchableOpacity = createReactClass({
         testID={this.props.testID}
         onLayout={this.props.onLayout}
         isTVSelectable={true}
+        sendsTVTouchEvents={this.props.sendsTVTouchEvents}
         tvParallaxProperties={this.props.tvParallaxProperties}
         hitSlop={this.props.hitSlop}
         onStartShouldSetResponder={this.touchableHandleStartShouldSetResponder}

@@ -49,7 +49,7 @@ class TVEventHandlerView extends React.Component {
     this._tvEventHandler = new TVEventHandler();
     this._tvEventHandler.enable(this, function(cmp, evt) {
       cmp.setState({
-        lastEventType: evt.eventType
+        lastEventType: JSON.stringify(evt)
       })
     });
   }
@@ -74,7 +74,7 @@ class TVEventHandlerView extends React.Component {
     if (Platform.isTVOS) {
       return (
         <View>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => {}} sendsTVTouchEvents={true}>
           <Text>
             This example enables an instance of TVEventHandler to show the last event detected from the Apple TV Siri remote or from a keyboard.
           </Text>
