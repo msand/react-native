@@ -23,55 +23,10 @@
 
 #import "RCTTouchHandler.h"
 
-@interface RCTTVPanGestureRecognizer : UIPanGestureRecognizer
-
-@property(nonatomic, assign) CGPoint firstTouchLocation;
-
-@end
-
-@implementation RCTTVPanGestureRecognizer
-
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
-{
-  UITouch *t = [touches anyObject];
-  self.firstTouchLocation = [t locationInView:self.view];
-  [self sendAppleTVEvent:@"touchesBegan" withTouch:t];
-}
-
-- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
-{
-  UITouch *t = [touches anyObject];
-  [self sendAppleTVEvent:@"touchesMoved" withTouch:t];
-}
-
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
-{
-  UITouch *t = [touches anyObject];
-  [self sendAppleTVEvent:@"touchesEnded" withTouch:t];
-}
-
-- (void)sendAppleTVEvent:(NSString *)eventType withTouch:(UITouch *)t
-{
-  CGPoint location = [t locationInView:self.view];
-  NSString *reactTag = @"";
-  if([self.view respondsToSelector:@selector(reactTag)]) {
-    reactTag = [self.view performSelector:@selector(reactTag)];
-  }
-  [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
-                                                      object:@{@"eventType":eventType,
-                                                               @"x":@(location.x - self.firstTouchLocation.x),
-                                                               @"y":@(location.y - self.firstTouchLocation.y),
-                                                               @"tag":reactTag}];
-}
-
-@end
-
-
 @implementation RCTTVView
 {
   UITapGestureRecognizer *_selectRecognizer;
   UIPanGestureRecognizer *_panRecognizer;
-  RCTTouchHandler *_touchHandler;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -112,10 +67,35 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
                                                       object:@{@"eventType":@"select",@"tag":self.reactTag}];
 }
 
-- (void)handlePan:(__unused UIGestureRecognizer *)r
+- (void)handlePan:(UIPanGestureRecognizer *)r
 {
+  CGPoint velocity = [r velocityInView:r.view];
+  NSString *eventName;
+  switch(r.state) {
+    case UIGestureRecognizerStateBegan:
+      eventName = @"panBegan";
+      break;
+    case UIGestureRecognizerStateEnded:
+      eventName = @"panEnded";
+      break;
+    case UIGestureRecognizerStateChanged:
+      eventName = @"panChanged";
+      break;
+    case UIGestureRecognizerStateFailed:
+      eventName = @"panFailed";
+      break;
+    case UIGestureRecognizerStatePossible:
+      eventName = @"panPossible";
+      break;
+    case UIGestureRecognizerStateCancelled:
+      eventName = @"panCancelled";
+      break;
+  }
   [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
-                                                      object:@{@"eventType":@"pan",@"tag":self.reactTag}];
+                                                      object:@{@"eventType":eventName,
+                                                               @"tag":self.reactTag,
+                                                               @"vx":@(velocity.x),
+                                                               @"vy":@(velocity.y)}];
 }
 
 - (BOOL)isUserInteractionEnabled
@@ -195,23 +175,12 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
   }];
 }
 
-- (RCTBridge *)bridge
-{
-  UIView *v = self;
-  while (v != nil && ![v isKindOfClass:[RCTRootView class]]) {
-    v = [v superview];
-  }
-  return [(RCTRootView *)v bridge];
-}
-
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
   if (context.nextFocusedView == self && self.isTVSelectable ) {
     [self becomeFirstResponder];
     if(self.sendsTVTouchEvents) {
-      //RCTTVPanGestureRecognizer *panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-      RCTBridge *b = [self bridge];
-      RCTTouchHandler *panRecognizer = [[RCTTouchHandler alloc] initWithBridge:b];
+      UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
       _panRecognizer = panRecognizer;
       [self addGestureRecognizer:_panRecognizer];
     }
