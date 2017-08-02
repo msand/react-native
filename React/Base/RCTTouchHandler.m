@@ -71,8 +71,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithTarget:(id)target action:(SEL)action
 - (void)attachToView:(UIView *)view
 {
   RCTAssert(self.view == nil, @"RCTTouchHandler already has attached view.");
-
+#if !TARGET_OS_TV
   [view addGestureRecognizer:self];
+#endif
 }
 
 - (void)detachFromView:(UIView *)view
@@ -80,7 +81,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithTarget:(id)target action:(SEL)action
   RCTAssertParam(view);
   RCTAssert(self.view == view, @"RCTTouchHandler attached to another view.");
 
+#if !TARGET_OS_TV
   [view removeGestureRecognizer:self];
+#endif
 }
 
 #pragma mark - Bookkeeping for touch indices

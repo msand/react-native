@@ -21,9 +21,77 @@
 #import "RCTView.h"
 #import "UIView+React.h"
 
+#import "RCTTouchHandler.h"
+@class RCTRootView;
+
+@interface RCTTouchHandler (TVView)
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event;
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event;
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event;
+
+@end
+
+@interface RCTTVPanGestureRecognizer: UIPanGestureRecognizer
+
+@property (nonatomic, strong) RCTTouchHandler *touchHandler;
+
+- (RCTTVPanGestureRecognizer *)initWithView:(RCTView *)v;
+
+@end
+
+@implementation RCTTVPanGestureRecognizer
+
+- (RCTBridge *)bridgeForView:(UIView *)v
+{
+  UIView *u = v;
+  while (u != nil && ![u isKindOfClass:[RCTRootView class]]) {
+    u = u.superview;
+  }
+  if (u != nil) {
+    RCTRootView *rv = (RCTRootView *)u;
+    return rv.bridge;
+  } else {
+    return nil;
+  }
+  
+}
+
+- (RCTTVPanGestureRecognizer *)initWithView:(RCTView *)v
+{
+  if (self = [super init]) {
+    RCTBridge *b = [self bridgeForView:v];
+    if (b != nil) {
+      self.touchHandler = [[RCTTouchHandler alloc] initWithBridge:[self bridgeForView:v]];
+    }
+  }
+  return self;
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self.touchHandler touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self.touchHandler touchesMoved:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self.touchHandler touchesEnded:touches withEvent:event];
+}
+
+
+@end
+
 @implementation RCTTVView
 {
   UITapGestureRecognizer *_selectRecognizer;
+  RCTTVPanGestureRecognizer *_panRecognizer;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -144,6 +212,12 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 {
   if (context.nextFocusedView == self && self.isTVSelectable ) {
     [self becomeFirstResponder];
+    if (self.sendsTVTouchEvents) {
+      _panRecognizer = [[RCTTVPanGestureRecognizer alloc] initWithView:self];
+      if (_panRecognizer) {
+        [self addGestureRecognizer:_panRecognizer];
+      }
+    }
     [coordinator addCoordinatedAnimations:^(void){
       if([self.tvParallaxProperties[@"enabled"] boolValue]) {
         [self addParallaxMotionEffects];
@@ -163,6 +237,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
         [self removeMotionEffect:effect];
       }
     } completion:^(void){}];
+    if (_panRecognizer) {
+      [self removeGestureRecognizer:_panRecognizer];
+    }
     [self resignFirstResponder];
   }
 }

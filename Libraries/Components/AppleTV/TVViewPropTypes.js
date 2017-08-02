@@ -23,6 +23,7 @@ var TVViewPropTypes = {
      * @platform ios
      */
     isTVSelectable: PropTypes.bool,
+    sendsTVTouchEvents: PropTypes.bool,
 
     /**
      * *(Apple TV only)* May be set to true to force the Apple TV focus engine to move focus to this view.
