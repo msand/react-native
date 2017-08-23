@@ -66,6 +66,9 @@ RCT_EXPORT_VIEW_PROPERTY(automaticallyAdjustContentInsets, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(decelerationRate, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(directionalLockEnabled, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(indicatorStyle, UIScrollViewIndicatorStyle)
+#if TARGET_OS_TV
+RCT_EXPORT_VIEW_PROPERTY(isTVScrollable, BOOL)
+#endif
 RCT_EXPORT_VIEW_PROPERTY(keyboardDismissMode, UIScrollViewKeyboardDismissMode)
 RCT_EXPORT_VIEW_PROPERTY(maximumZoomScale, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(minimumZoomScale, CGFloat)

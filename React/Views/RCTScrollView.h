@@ -57,6 +57,8 @@
 @property (nonatomic, copy) RCTDirectEventBlock onMomentumScrollBegin;
 @property (nonatomic, copy) RCTDirectEventBlock onMomentumScrollEnd;
 
+@property (nonatomic, assign) BOOL isTVScrollable;
+
 @end
 
 @interface RCTEventDispatcher (RCTScrollView)

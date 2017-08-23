@@ -28,6 +28,47 @@ exports.title = '<ScrollView>';
 exports.description = 'Component that enables scrolling through child components';
 exports.examples = [
 {
+  title: '<ScrollView> with big text',
+  description: 'Test large scrolling view on Apple TV',
+  render: function() {
+    if (!Platform.isTVOS) {
+      return (
+        <View style={styles.scrollView}>>
+          <Text>
+            This example is only supported on Apple TV
+          </Text>
+        </View>
+      );
+    } 
+    return (
+      <View>
+        <ScrollView
+          removeClippedSubviews={false}
+          isTVScrollable={true}
+          scrollEventThrottle={200}
+          style={styles.scrollView}>
+          <Text style={{fontSize: 80}}>
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+            The quick brown fox jumped over the lazy dog.  
+          </Text>
+        </ScrollView>
+      </View>
+    );
+  }
+},
+{
   title: '<ScrollView>',
   description: 'To make content scrollable, wrap it within a <ScrollView> component',
   render: function() {
@@ -39,6 +80,8 @@ exports.examples = [
            * an error when upgrading Flow's support for React. Common errors
            * found when upgrading Flow's React support are documented at
            * https://fburl.com/eq7bs81w */
+          isTVScrollable={true}
+          removeClippedSubviews={false}
           ref={(scrollView) => { _scrollView = scrollView; }}
           automaticallyAdjustContentInsets={false}
           onScroll={() => { console.log('onScroll!'); }}
@@ -81,6 +124,8 @@ exports.examples = [
              * suppresses an error when upgrading Flow's support for React.
              * Common errors found when upgrading Flow's React support are
              * documented at https://fburl.com/eq7bs81w */
+            removeClippedSubviews={false}
+            isTVScrollable={true}
             ref={(scrollView) => { _scrollView = scrollView; }}
             automaticallyAdjustContentInsets={false}
             horizontal={true}
@@ -153,7 +198,6 @@ var createThumbRow = (uri, i) => <Thumb key={i} source={uri} />;
 var styles = StyleSheet.create({
   scrollView: {
     backgroundColor: '#eeeeee',
-    height: 300,
   },
   horizontalScrollView: {
     height: 106,

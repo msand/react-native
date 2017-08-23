@@ -154,6 +154,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 @interface RCTCustomScrollView : UIScrollView<UIGestureRecognizerDelegate>
 
 @property (nonatomic, assign) BOOL centerContent;
+@property (nonatomic, assign) BOOL isTVScrollable;
 #if !TARGET_OS_TV
 @property (nonatomic, strong) RCTRefreshControl *rctRefreshControl;
 @property (nonatomic, assign) BOOL pinchGestureEnabled;
@@ -163,6 +164,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 
 
 @implementation RCTCustomScrollView
+{
+  UIPanGestureRecognizer *_tvPanGestureRecognizer;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -348,6 +352,35 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 }
 #endif //TARGET_OS_TV
 
+#if TARGET_OS_TV
+
+- (BOOL)canBecomeFocused
+{
+  return self.isTVScrollable;
+}
+
+- (BOOL)isUserInteractionEnabled
+{
+  return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  if (context.nextFocusedView == self && self.isTVScrollable ) {
+    [self becomeFirstResponder];
+    _tvPanGestureRecognizer = [[UIPanGestureRecognizer alloc] init];
+    _tvPanGestureRecognizer.allowedTouchTypes = @[ @(UITouchTypeIndirect)];
+    [self addGestureRecognizer:_tvPanGestureRecognizer];
+  } else {
+    if (_tvPanGestureRecognizer) {
+      [self removeGestureRecognizer:_tvPanGestureRecognizer];
+    }
+    [self resignFirstResponder];
+  }
+}
+
+#endif
+
 @end
 
 @implementation RCTScrollView
@@ -362,6 +395,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   uint16_t _coalescingKey;
   NSString *_lastEmittedEventName;
   NSHashTable *_scrollListeners;
+  UIPanGestureRecognizer *_panGestureRecognizer;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -375,7 +409,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _scrollView.delegate = self;
     _scrollView.delaysContentTouches = NO;
-
+#if TARGET_OS_TV
+    _isTVScrollable = NO;
+#endif
+    
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
     // `contentInsetAdjustmentBehavior` is only available since iOS 11.
     // We set the default behavior to "never" so that iOS
@@ -961,6 +998,17 @@ RCT_SET_AND_PRESERVE_OFFSET(setScrollIndicatorInsets, scrollIndicatorInsets, UIE
   [_eventDispatcher sendEvent:scrollEvent];
 }
 
+#pragma mark -
+#pragma mark Apple TV
+
+- (void)setIsTVScrollable:(BOOL)isTVScrollable
+{
+  _isTVScrollable = isTVScrollable;
+  _scrollView.isTVScrollable = _isTVScrollable;
+  
+}
+
+
 @end
 
 @implementation RCTEventDispatcher (RCTScrollView)
@@ -980,5 +1028,8 @@ RCT_SET_AND_PRESERVE_OFFSET(setScrollIndicatorInsets, scrollIndicatorInsets, UIE
                                                                 coalescingKey:0];
   [self sendEvent:fakeScrollEvent];
 }
+
+
+
 
 @end

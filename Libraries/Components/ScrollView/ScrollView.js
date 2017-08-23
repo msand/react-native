@@ -187,6 +187,11 @@ const ScrollView = createReactClass({
       'white',
     ]),
     /**
+     * When true, the ScrollView will be focusable by the Apple TV focus engine, and will
+     * scroll in response to vertical swipes on the Siri remote.
+     */
+    isTVScrollable: PropTypes.bool,
+    /**
      * When true, the ScrollView will try to lock to only vertical or horizontal
      * scrolling while dragging.  The default value is false.
      * @platform ios
