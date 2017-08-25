@@ -34,7 +34,10 @@
       @"shiftDistanceX": @2.0f,
       @"shiftDistanceY": @2.0f,
       @"tiltAngle": @0.05f,
-      @"magnification": @1.0f
+      @"magnification": @1.0f,
+	  @"pressMagnification": @1.0f,
+      @"pressDuration": @0.3f,
+      @"pressDelay": @0.0f
     };
   }
 
@@ -59,8 +62,39 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
 
 - (void)handleSelect:(__unused UIGestureRecognizer *)r
 {
-  [[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
-                                                      object:@{@"eventType":@"select",@"tag":self.reactTag}];
+	
+	if([self.tvParallaxProperties[@"enabled"] boolValue] == YES) {
+		float magnification = [self.tvParallaxProperties[@"pressMagnification"] floatValue];
+		
+		// Duration of press animation
+		float pressDuration = [self.tvParallaxProperties[@"pressDuration"] floatValue];
+		
+		// Delay of press animation
+		float pressDelay = [self.tvParallaxProperties[@"pressDelay"] floatValue];
+		
+		[UIView animateWithDuration:pressDuration
+				delay:pressDelay
+				options: UIViewAnimationOptionBeginFromCurrentState
+				animations: ^{
+	
+					// Transform the view to the initial magnification
+					self.transform = CGAffineTransformMakeScale(1.0, 1.0);
+	
+				}
+				completion:^(__unused BOOL finished) {
+					
+					// Transform the view the focus magnification
+					self.transform = CGAffineTransformMakeScale(magnification, magnification);
+				
+					[[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
+																		object:@{@"eventType":@"select",@"tag":self.reactTag}];
+				}];
+	} else {
+		[[NSNotificationCenter defaultCenter] postNotificationName:RCTTVNavigationEventNotification
+															object:@{@"eventType":@"select",@"tag":self.reactTag}];
+	}
+	
+
 }
 
 - (BOOL)isUserInteractionEnabled

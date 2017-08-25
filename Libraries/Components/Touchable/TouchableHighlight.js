@@ -14,6 +14,7 @@
 const ColorPropType = require('ColorPropType');
 const NativeMethodsMixin = require('NativeMethodsMixin');
 const PropTypes = require('prop-types');
+const Platform = require('Platform');
 const React = require('React');
 const ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 const StyleSheet = require('StyleSheet');
@@ -104,6 +105,9 @@ var TouchableHighlight = createReactClass({
      * shiftDistanceY: Defaults to 2.0.
      * tiltAngle: Defaults to 0.05.
      * magnification: Defaults to 1.0.
+     * pressMagnification: Defaults to 1.0.
+     * pressDuration: Defaults to 0.3.
+     * pressDelay: Defaults to 0.0.
      *
      * @platform ios
      */
@@ -202,12 +206,13 @@ var TouchableHighlight = createReactClass({
 
   touchableHandlePress: function(e: Event) {
     this.clearTimeout(this._hideTimeout);
-    this._showUnderlay();
+    if (!Platform.isTVOS) {
+      this._showUnderlay();
     /* $FlowFixMe(>=0.53.0 site=react_native_fb) This comment suppresses an
      * error found when Flow v0.53 was deployed. To see the error delete this
      * comment and run Flow. */
-    this._hideTimeout = this.setTimeout(this._hideUnderlay,
-      this.props.delayPressOut || 100);
+      this._hideTimeout = this.setTimeout(this._hideUnderlay, this.props.delayPressOut || 100);
+	}
     this.props.onPress && this.props.onPress(e);
   },
 
