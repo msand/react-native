@@ -120,8 +120,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:coder)
   [super insertReactSubview:subview atIndex:atIndex];
   [_touchHandler attachToView:subview];
 #if TARGET_OS_TV
-  for (UIGestureRecognizer *gr in self.tvRemoteHandler.tvRemoteGestureRecognizers) {
-    [subview addGestureRecognizer:gr];
+  for (NSString *key in [self.tvRemoteHandler.tvRemoteGestureRecognizers allKeys]) {
+    if (![key isEqualToString:RCTTVRemoteEventMenu]) {
+      [subview addGestureRecognizer:self.tvRemoteHandler.tvRemoteGestureRecognizers[key]];
+    }
   }
   if (_onRequestClose) {
     [subview addGestureRecognizer:_menuButtonGestureRecognizer];
