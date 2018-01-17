@@ -33,31 +33,18 @@ module.exports = function registerNativeModuleIOS(dependencyConfig, projectConfi
   );
 
   const targets = getTargets(project);
+  const iOStargets = targets.filter(({ isTVOS }) => !isTVOS);
+  const tvOStargets = targets.filter(({ isTVOS }) => isTVOS);
 
   addProjectToLibraries(libraries, file);
 
-  getTargets(dependencyProject).forEach(product => {
-    var i;
-    if (!product.isTVOS) {
-      for (i=0; i<targets.length; i++) {
-        if(!targets[i].isTVOS) {
-          project.addStaticLibrary(product.name, {
-            target: targets[i].uuid
-          });
-        }
-      }
-    }
-
-    if (product.isTVOS) {
-      for (i=0; i<targets.length; i++) {
-        if(targets[i].isTVOS) {
-          project.addStaticLibrary(product.name, {
-            target: targets[i].uuid
-          });
-        }
-      }
-    }
-  });
+  getTargets(dependencyProject).forEach(product =>
+    (product.isTVOS ? tvOStargets : iOStargets).forEach(({ uuid }) =>
+      project.addStaticLibrary(product.name, {
+        target: uuid
+      })
+    )
+  );
 
   addSharedLibraries(project, dependencyConfig.sharedLibraries);
 
