@@ -24,6 +24,7 @@
 - (void)extractOffset;
 
 @property (nonatomic, assign) CGFloat value;
+@property (nonatomic, strong) NSString* stringValue;
 @property (nonatomic, weak) id<RCTValueAnimatedNodeObserver> valueObserver;
 
 @end

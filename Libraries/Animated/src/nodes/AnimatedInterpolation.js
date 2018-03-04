@@ -359,8 +359,7 @@ class AnimatedInterpolation extends AnimatedWithChildren {
         const radians = degrees * Math.PI / 180.0;
         return radians;
       } else {
-        // Assume radians
-        return parseFloat(value) || 0;
+        return value;
       }
     });
   }

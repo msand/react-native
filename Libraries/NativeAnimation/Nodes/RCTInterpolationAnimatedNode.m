@@ -9,27 +9,44 @@
 
 #import "RCTAnimationUtils.h"
 
+NSRegularExpression *regex;
+
 @implementation RCTInterpolationAnimatedNode
 {
   __weak RCTValueAnimatedNode *_parentNode;
   NSArray<NSNumber *> *_inputRange;
   NSArray<NSNumber *> *_outputRange;
+  NSArray<NSString *> *_soutputRange;
   NSString *_extrapolateLeft;
   NSString *_extrapolateRight;
+  bool _hasStringOutput;
 }
 
 - (instancetype)initWithTag:(NSNumber *)tag
                      config:(NSDictionary<NSString *, id> *)config
 {
+  if (!regex) {
+    regex = [NSRegularExpression regularExpressionWithPattern:@"[0-9.-]+" options:NSRegularExpressionCaseInsensitive error:nil];
+  }
   if ((self = [super initWithTag:tag config:config])) {
     _inputRange = [config[@"inputRange"] copy];
     NSMutableArray *outputRange = [NSMutableArray array];
+    NSMutableArray *soutputRange = [NSMutableArray array];
+
+    _hasStringOutput = NO;
     for (id value in config[@"outputRange"]) {
       if ([value isKindOfClass:[NSNumber class]]) {
         [outputRange addObject:value];
+      } else if ([value isKindOfClass:[NSString class]]) {
+        [soutputRange addObject:value];
+        NSTextCheckingResult* match = [regex firstMatchInString:value options:NSMatchingAnchored range:NSMakeRange(0, [value length])];
+        NSString* strNumber = [value substringWithRange:match.range];
+        [outputRange addObject:[NSNumber numberWithDouble:strNumber.doubleValue]];
+        _hasStringOutput = YES;
       }
     }
     _outputRange = [outputRange copy];
+    _soutputRange = [soutputRange copy];
     _extrapolateLeft = config[@"extrapolateLeft"];
     _extrapolateRight = config[@"extrapolateRight"];
   }
@@ -61,11 +78,18 @@
 
   CGFloat inputValue = _parentNode.value;
 
-  self.value = RCTInterpolateValueInRange(inputValue,
-                                          _inputRange,
-                                          _outputRange,
-                                          _extrapolateLeft,
-                                          _extrapolateRight);
+  CGFloat interpolated = RCTInterpolateValueInRange(inputValue,
+                                                    _inputRange,
+                                                    _outputRange,
+                                                    _extrapolateLeft,
+                                                    _extrapolateRight);
+  self.value = interpolated;
+  if (_hasStringOutput) {
+    self.stringValue = [regex stringByReplacingMatchesInString:_soutputRange[0]
+                                                 options:0
+                                                   range:NSMakeRange(0, _soutputRange[0].length)
+                                            withTemplate:[NSString stringWithFormat:@"%.3f", interpolated]];
+  }
 }
 
 @end
