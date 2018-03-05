@@ -9,6 +9,11 @@ package com.facebook.react.animated;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.annotation.Nullable;
 
 /**
@@ -21,6 +26,7 @@ import javax.annotation.Nullable;
   public static final String EXTRAPOLATE_TYPE_IDENTITY = "identity";
   public static final String EXTRAPOLATE_TYPE_CLAMP = "clamp";
   public static final String EXTRAPOLATE_TYPE_EXTEND = "extend";
+  static final Pattern regex = Pattern.compile("[0-9.-]+");
 
   private static double[] fromDoubleArray(ReadableArray ary) {
     double[] res = new double[ary.size()];
@@ -105,13 +111,32 @@ import javax.annotation.Nullable;
 
   private final double mInputRange[];
   private final double mOutputRange[];
+  private final boolean mHasStringOutput;
+  private final Matcher mSOutputMatcher;
   private final String mExtrapolateLeft;
   private final String mExtrapolateRight;
   private @Nullable ValueAnimatedNode mParent;
 
   public InterpolationAnimatedNode(ReadableMap config) {
     mInputRange = fromDoubleArray(config.getArray("inputRange"));
-    mOutputRange = fromDoubleArray(config.getArray("outputRange"));
+    ReadableArray output = config.getArray("outputRange");
+    mHasStringOutput = output.getType(0) == ReadableType.String;
+    if (mHasStringOutput) {
+      int size = output.size();
+      mOutputRange = new double[size];
+      String pattern = output.getString(0);
+      mSOutputMatcher = regex.matcher(pattern);
+      for (int i = 0; i < size; i++) {
+        String val = output.getString(i);
+        Matcher m = regex.matcher(val);
+        if (m.find()) {
+          mOutputRange[i] = Double.parseDouble(m.group());
+        }
+      }
+    } else {
+      mOutputRange = fromDoubleArray(output);
+      mSOutputMatcher = null;
+    }
     mExtrapolateLeft = config.getString("extrapolateLeft");
     mExtrapolateRight = config.getString("extrapolateRight");
   }
@@ -143,5 +168,8 @@ import javax.annotation.Nullable;
       return;
     }
     mValue = interpolate(mParent.getValue(), mInputRange, mOutputRange, mExtrapolateLeft, mExtrapolateRight);
+    if (mHasStringOutput) {
+      mStringValue = mSOutputMatcher.replaceFirst(String.valueOf(mValue));
+    }
   }
 }
