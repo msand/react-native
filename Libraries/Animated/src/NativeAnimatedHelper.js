@@ -272,7 +272,7 @@ function transformDataType(value: any): number {
     return radians;
   } else {
     // Assume radians
-    return parseFloat(value) || 0;
+    return value;
   }
 }
 
