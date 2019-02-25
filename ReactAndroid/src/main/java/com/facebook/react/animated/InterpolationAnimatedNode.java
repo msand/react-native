@@ -119,7 +119,7 @@ import javax.annotation.Nullable;
   private final String mExtrapolateLeft;
   private final String mExtrapolateRight;
   private @Nullable ValueAnimatedNode mParent;
-  private boolean shouldRound;
+  private boolean mShouldRound;
   private int numVals;
 
   public InterpolationAnimatedNode(ReadableMap config) {
@@ -130,7 +130,7 @@ import javax.annotation.Nullable;
       int size = output.size();
       mOutputRange = new double[size];
       mPattern = output.getString(0);
-      shouldRound = mPattern.startsWith("rgb");
+      mShouldRound = mPattern.startsWith("rgb");
       mSOutputMatcher = regex.matcher(mPattern);
       ArrayList<ArrayList<Double>> mOutputRanges = new ArrayList<>();
       for (int i = 0; i < size; i++) {
@@ -196,7 +196,7 @@ import javax.annotation.Nullable;
         mSOutputMatcher.reset();
         while (mSOutputMatcher.find()) {
           double val = interpolate(value, mInputRange, mOutputs[i++], mExtrapolateLeft, mExtrapolateRight);
-          if (shouldRound) {
+          if (mShouldRound) {
             boolean isAlpha = i == 4;
             int rounded = (int)Math.round(isAlpha ? val * 1000 : val);
             mSOutputMatcher.appendReplacement(sb, isAlpha ? String.valueOf((double)rounded / 1000) : String.valueOf(rounded));
