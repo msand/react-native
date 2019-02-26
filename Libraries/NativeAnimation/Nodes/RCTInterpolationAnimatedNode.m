@@ -156,9 +156,9 @@ NSRegularExpression *regex;
 
         [formattedText replaceCharactersInRange:[match range] withString:str];
       }
-      self.stringValue = formattedText;
+      self.animatedObject = formattedText;
     } else {
-      self.stringValue = [regex stringByReplacingMatchesInString:_soutputRange[0]
+      self.animatedObject = [regex stringByReplacingMatchesInString:_soutputRange[0]
                                                  options:0
                                                    range:NSMakeRange(0, _soutputRange[0].length)
                                             withTemplate:[NSString stringWithFormat:@"%1f", interpolated]];

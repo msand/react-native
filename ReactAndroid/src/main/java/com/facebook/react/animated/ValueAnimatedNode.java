@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
  * library.
  */
 /*package*/ class ValueAnimatedNode extends AnimatedNode {
-  /*package*/ String mStringValue = null;
+  /*package*/ Object mAnimatedObject = null;
   /*package*/ double mValue = Double.NaN;
   /*package*/ double mOffset = 0;
   private @Nullable AnimatedNodeValueListener mValueListener;
@@ -34,8 +34,8 @@ import javax.annotation.Nullable;
     return mOffset + mValue;
   }
 
-  public String getStringValue() {
-    return mStringValue;
+  public Object getAnimatedObject() {
+    return mAnimatedObject;
   }
 
   public void flattenOffset() {
