@@ -35,6 +35,7 @@ class AnimatedNode {
 
   /* Methods and props used by native Animated impl */
   __isNative: boolean;
+  __isConnected: boolean;
   __nativeTag: ?number;
   __makeNative() {
     if (!this.__isNative) {
