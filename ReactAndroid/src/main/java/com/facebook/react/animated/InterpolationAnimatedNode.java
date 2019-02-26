@@ -127,6 +127,14 @@ import javax.annotation.Nullable;
     ReadableArray output = config.getArray("outputRange");
     mHasStringOutput = output.getType(0) == ReadableType.String;
     if (mHasStringOutput) {
+      /*
+       * Supports string shapes by extracting numbers so new values can be computed,
+       * and recombines those values into new strings of the same shape.  Supports
+       * things like:
+       *
+       *   rgba(123, 42, 99, 0.36) // colors
+       *   -45deg                  // values with units
+       */
       int size = output.size();
       mOutputRange = new double[size];
       mPattern = output.getString(0);
@@ -144,6 +152,15 @@ import javax.annotation.Nullable;
         }
         mOutputRange[i] = outputRange.get(0);
       }
+
+      // ['rgba(0, 100, 200, 0)', 'rgba(50, 150, 250, 0.5)']
+      // ->
+      // [
+      //   [0, 50],
+      //   [100, 150],
+      //   [200, 250],
+      //   [0, 0.5],
+      // ]
       numVals = mOutputRanges.get(0).size();
       mOutputs = new double[numVals][];
       for (int j = 0; j < numVals; j++) {
@@ -190,6 +207,9 @@ import javax.annotation.Nullable;
     double value = mParent.getValue();
     mValue = interpolate(value, mInputRange, mOutputRange, mExtrapolateLeft, mExtrapolateRight);
     if (mHasStringOutput) {
+      // 'rgba(0, 100, 200, 0)'
+      // ->
+      // 'rgba(${interpolations[0](input)}, ${interpolations[1](input)}, ...'
       if (numVals > 1) {
         StringBuffer sb = new StringBuffer(mPattern.length());
         int i = 0;
@@ -197,6 +217,8 @@ import javax.annotation.Nullable;
         while (mSOutputMatcher.find()) {
           double val = interpolate(value, mInputRange, mOutputs[i++], mExtrapolateLeft, mExtrapolateRight);
           if (mShouldRound) {
+            // rgba requires that the r,g,b are integers.... so we want to round them, but we *dont* want to
+            // round the opacity (4th column).
             boolean isAlpha = i == 4;
             int rounded = (int)Math.round(isAlpha ? val * 1000 : val);
             mSOutputMatcher.appendReplacement(sb, isAlpha ? String.valueOf((double)rounded / 1000) : String.valueOf(rounded));
