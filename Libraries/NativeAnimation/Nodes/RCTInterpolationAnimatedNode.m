@@ -29,9 +29,10 @@ NSRegularExpression *regex;
 - (instancetype)initWithTag:(NSNumber *)tag
                      config:(NSDictionary<NSString *, id> *)config
 {
-  if (!regex) {
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
     regex = [NSRegularExpression regularExpressionWithPattern:@"[0-9.-]+" options:NSRegularExpressionCaseInsensitive error:nil];
-  }
+  });
   if ((self = [super initWithTag:tag config:config])) {
     _inputRange = [config[@"inputRange"] copy];
     NSMutableArray *outputRange = [NSMutableArray array];
@@ -43,6 +44,14 @@ NSRegularExpression *regex;
       if ([value isKindOfClass:[NSNumber class]]) {
         [outputRange addObject:value];
       } else if ([value isKindOfClass:[NSString class]]) {
+        /**
+         * Supports string shapes by extracting numbers so new values can be computed,
+         * and recombines those values into new strings of the same shape.  Supports
+         * things like:
+         *
+         *   rgba(123, 42, 99, 0.36) // colors
+         *   -45deg                  // values with units
+         */
         NSMutableArray *output = [NSMutableArray array];
         [_outputRanges addObject:output];
         [soutputRange addObject:value];
@@ -58,6 +67,14 @@ NSRegularExpression *regex;
       }
     }
     if (_hasStringOutput) {
+      // ['rgba(0, 100, 200, 0)', 'rgba(50, 150, 250, 0.5)']
+      // ->
+      // [
+      //   [0, 50],
+      //   [100, 150],
+      //   [200, 250],
+      //   [0, 0.5],
+      // ]
       _numVals = [_matches count];
       NSString *value = [soutputRange objectAtIndex:0];
       _shouldRound = [value containsString:@"rgb"];
@@ -113,6 +130,9 @@ NSRegularExpression *regex;
                                                     _extrapolateRight);
   self.value = interpolated;
   if (_hasStringOutput) {
+    // 'rgba(0, 100, 200, 0)'
+    // ->
+    // 'rgba(${interpolations[0](input)}, ${interpolations[1](input)}, ...'
     if (_numVals > 1) {
       NSString *text = _soutputRange[0];
       NSMutableString *formattedText = [NSMutableString stringWithString:text];
@@ -125,6 +145,8 @@ NSRegularExpression *regex;
                                                           _extrapolateRight);
         NSString *str;
         if (_shouldRound) {
+          // rgba requires that the r,g,b are integers.... so we want to round them, but we *dont* want to
+          // round the opacity (4th column).
           bool isAlpha = i == 3;
           CGFloat rounded = isAlpha ? round(val * 1000) / 1000 : round(val);
           str = isAlpha ? [NSString stringWithFormat:@"%1.3f", rounded] : [NSString stringWithFormat:@"%1.0f", rounded];
