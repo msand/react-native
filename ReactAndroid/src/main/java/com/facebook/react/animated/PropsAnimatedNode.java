@@ -84,9 +84,9 @@ import javax.annotation.Nullable;
       } else if (node instanceof StyleAnimatedNode) {
         ((StyleAnimatedNode) node).collectViewUpdates(mPropMap);
       } else if (node instanceof ValueAnimatedNode) {
-        String stringValue = ((ValueAnimatedNode) node).getStringValue();
-        if (stringValue != null) {
-          mPropMap.putString(entry.getKey(), stringValue);
+        Object animatedObject = ((ValueAnimatedNode) node).getAnimatedObject();
+        if (animatedObject instanceof String) {
+          mPropMap.putString(entry.getKey(), (String)animatedObject);
         } else {
           mPropMap.putDouble(entry.getKey(), ((ValueAnimatedNode) node).getValue());
         }

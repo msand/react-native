@@ -110,9 +110,9 @@
 
     } else if ([parentNode isKindOfClass:[RCTValueAnimatedNode class]]) {
       NSString *property = [self propertyNameForParentTag:parentTag];
-      NSString *stringValue = [(RCTValueAnimatedNode *)parentNode stringValue];
-      if (stringValue) {
-        self->_propsDictionary[property] = stringValue;
+      id animatedObject = [(RCTValueAnimatedNode *)parentNode animatedObject];
+      if (animatedObject) {
+        self->_propsDictionary[property] = animatedObject;
       } else {
         CGFloat value = [(RCTValueAnimatedNode *)parentNode value];
         self->_propsDictionary[property] = @(value);

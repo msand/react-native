@@ -205,9 +205,9 @@ import javax.annotation.Nullable;
           }
         }
         mSOutputMatcher.appendTail(sb);
-        mStringValue = sb.toString();
+        mAnimatedObject = sb.toString();
       } else {
-        mStringValue = mSOutputMatcher.replaceFirst(String.valueOf(mValue));
+        mAnimatedObject = mSOutputMatcher.replaceFirst(String.valueOf(mValue));
       }
     }
   }
