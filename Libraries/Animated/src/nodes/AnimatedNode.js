@@ -42,11 +42,6 @@ class AnimatedNode {
       throw new Error('This node cannot be made a "native" animated node');
     }
   }
-  __connectAnimatedNodes() {
-    if (!this.__isNative) {
-      throw new Error('This node cannot be connected natively');
-    }
-  }
   __getNativeTag(): ?number {
     NativeAnimatedHelper.assertNativeAnimatedModule();
     invariant(
